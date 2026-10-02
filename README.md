@@ -1,74 +1,95 @@
-FitAI is a web app built to remove the fear of beginning at the gym — starting with students at The Ohio State University.
+# FitAI
 
-Using AI-powered body scanning (TensorFlow) and the Gemini API, FitAI creates a personalized workout and diet plan based on each user’s body type and goals. It also connects to a PostgreSQL database that includes Ohio State’s dining and gym information, making the plans relevant, convenient, and realistic for OSU students.
+**An AI fitness coach that scans your body in the browser with TensorFlow.js pose detection, then uses Gemini to generate a personalized workout and diet plan built around Ohio State's gyms and dining halls.**
 
-🚀 Why FitAI
+Built at a hackathon to take the fear out of starting at the gym, beginning with OSU students.
 
-Starting a fitness journey can be intimidating — especially for beginners who don’t know where to start, what workouts to do, or what to eat. FitAI makes that process easier by combining AI guidance, real data, and friendly interaction in one clean, intuitive app.
+[Demo](https://www.youtube.com/watch?v=K5WOeHgslAE)
+<!-- Replace with a 10 to 15 second GIF: run the body scan, then show the generated workout and meal plan -->
 
-✨ Core Features
+> **No hosted demo.** The app runs on a personal Gemini API key, so there's no public instance. You can run it locally with your own key (see [Run it yourself](#run-it-yourself)).
 
-🧠 AI-powered personalization — Uses TensorFlow for body scanning and Gemini API for generating tailored workout and diet plans.
+---
 
-💬 Smart chatbot — Lets users ask fitness or nutrition questions and get instant, encouraging responses.
+## How it works
 
-🏋️ OSU integration — Pulls data from Ohio State’s gym locations and dining options to suggest workouts and meals students can actually follow.
+1. **Body scan.** A MoveNet pose detection model runs entirely in the browser via TensorFlow.js, reading body keypoints from the user's camera with no server round trip.
+2. **Personalization.** Scan results and the user's goals are sent to the Gemini API, which generates a tailored workout and diet plan.
+3. **Campus grounding.** Plans pull from a PostgreSQL database of Ohio State gym locations and dining options, so every suggestion is something a student can actually do this week.
+4. **Coaching chat.** A built-in chatbot answers fitness and nutrition questions with beginner-friendly guidance.
 
-🎨 Clean React frontend — Modern, interactive, and mobile-friendly interface focused on comfort and confidence.
+## Architecture
 
-🗃️ PostgreSQL backend — Stores user data, fitness progress, and OSU facility info.
+```
+┌────────────────────────────────┐
+│  React frontend                │
+│  TensorFlow.js + MoveNet       │  ← pose detection runs client-side
+└───────────────┬────────────────┘
+                │ scan results + goals
+┌───────────────▼────────────────┐
+│  Node.js backend               │
+└───────┬────────────────┬───────┘
+        │                │
+┌───────▼───────┐  ┌─────▼────────────────────┐
+│  Gemini API   │  │  PostgreSQL              │
+│  plan + chat  │  │  OSU gyms · dining · users│
+└───────────────┘  └──────────────────────────┘
+```
 
-🧩 Tech Stack
+## Tech stack
 
-Frontend: React + TailwindCSS
+| Layer | Technology |
+|---|---|
+| Frontend | React, React Router, TypeScript, Vite, Tailwind CSS |
+| Computer vision | TensorFlow.js with MoveNet pose detection |
+| AI | Gemini API for plan generation and chat |
+| Backend | Node.js |
+| Database | PostgreSQL with OSU gym and dining data |
+| Deployment | Docker |
 
-AI/ML: TensorFlow.js + Gemini API
+## My role
 
-Backend: Node.js / Express
+I built the computer vision body scan, from camera to AI analysis:
 
-Database: PostgreSQL (OSU-specific data)
+- **Live camera pipeline** that streams the user's webcam into a MoveNet pose detection model running fully in the browser with TensorFlow.js
+- **Skeleton overlay** that draws detected keypoints and connecting lines on the video in real time, so users can see exactly what the model is tracking
+- **Metric extraction** that turns raw keypoint coordinates into body measurements like [e.g. shoulder-to-hip ratio, limb proportions, posture alignment]
+- **AI handoff** that packages those metrics into a structured prompt for Gemini, which uses them to personalize the workout and diet plan
 
-🧭 Future Roadmap
+## Roadmap
 
-FitAI’s long-term vision is to expand beyond Ohio State and bring the same personalized experience to colleges and cities nationwide — connecting local gyms, dining halls, and healthy spots everywhere.
+- Expansion beyond Ohio State to other universities and cities
+- Dynamic local meal recommendations
+- AI-powered form correction and progress tracking
+- Achievement system to build consistency
 
-Planned features include:
+---
 
-🌎 Expansion to multiple universities and cities
+## Run it yourself
 
-🍽️ Dynamic local meal recommendations
+**Requirements:** Node.js, PostgreSQL, and a Gemini API key.
 
-🎥 AI-powered form correction and progress tracking
-
-🏆 Achievement system to motivate consistency
-
-❤️ Our Mission
-
-To make fitness accessible, personalized, and fear-free — helping students build habits that last long after college.
-
-⚙️ How to Run Locally
-1. Clone the repository
-git clone https://github.com/yourusername/fitai.git
-cd fitai
-
-2. Install dependencies
+```bash
+git clone https://github.com/simonlunay/FitAI.git
+cd FitAI
 npm install
+```
 
-3. Set up environment variables
+Create a `.env` in the project root:
 
-Create a .env file in the project root with:
-
+```env
 GEMINI_API_KEY=your_api_key_here
 DATABASE_URL=postgresql://postgres:password@localhost:5432/fitai
+```
 
-4. Start the development server
+Then start the dev server:
+
+```bash
 npm run dev
+```
 
+Open the local URL printed in your terminal.
 
-Then open http://localhost:3000
- to view FitAI in your browser.
+---
 
-📈 In Summary
-
-FitAI isn’t just another fitness app — it’s a confidence builder.
-By blending AI, real campus data, and approachable design, it helps students take their first step toward lifelong health — one personalized plan at a time.
+Team project, originally developed at [ChuckyT15/FitAI](https://github.com/ChuckyT15/FitAI). README by [Simon Lunay](https://www.simonlunay.com) · [LinkedIn](https://www.linkedin.com/in/simonlunay)
